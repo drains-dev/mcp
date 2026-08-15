@@ -3,11 +3,11 @@ import { McpServer } from '@modelcontextprotocol/server'
 import { StdioServerTransport } from '@modelcontextprotocol/server/stdio'
 import * as z from 'zod/v4'
 
-const API_URL = process.env.SKUNKWORKS_API_URL
-const API_TOKEN = process.env.SKUNKWORKS_API_TOKEN
+const API_URL = process.env.DRAINS_API_URL
+const API_TOKEN = process.env.DRAINS_API_TOKEN
 
 if (!API_URL || !API_TOKEN) {
-  console.error('SKUNKWORKS_API_URL and SKUNKWORKS_API_TOKEN must both be set.')
+  console.error('DRAINS_API_URL and DRAINS_API_TOKEN must both be set.')
   process.exit(1)
 }
 
@@ -62,7 +62,7 @@ just renders as a broken/locked pill later, not an error now.
 
 server.registerTool(
   'list_drains',
-  { description: 'List the drains (engineering logs) this account belongs to.', inputSchema: z.object({}) },
+  { description: 'List the drains (logs) this account belongs to.', inputSchema: z.object({}) },
   async () => text(await api('GET', '/api/drains'))
 )
 
