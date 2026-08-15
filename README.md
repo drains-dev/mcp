@@ -25,3 +25,4 @@ Setup:
 3. Restart the client. It will list drains, read and post entries, invite members, and trigger AI summaries on your behalf, with the same access as signing in yourself — except it can only edit or delete entries it (or your own account) originally created.
 
 Regenerate or revoke the token from the SkunkWorks Logs API Tokens dialog at any time; revoking it immediately cuts the agent off.
+<img width="1911" height="904" alt="image" src="https://github.com/user-attachments/assets/96504d54-1521-44d8-b00e-3bca5d6622e3" />
