@@ -69,10 +69,12 @@ server.registerTool(
 server.registerTool(
   'create_drain',
   {
-    description: 'Create a new drain.',
+    description: 'Create a new drain. It starts private and becomes shared when someone is invited (invite_member).',
     inputSchema: z.object({
       title: z.string(),
-      visibility: z.enum(['private', 'shared']),
+      // Ignored by the server since sharing is derived from membership; kept
+      // optional so older prompts that still pass it don't fail validation.
+      visibility: z.enum(['private', 'shared']).optional(),
       description: z.string().optional(),
       tags: z.array(z.string()).optional(),
     }),
@@ -124,7 +126,7 @@ server.registerTool(
 server.registerTool(
   'list_entries',
   {
-    description: 'List entries in a drain, newest first. Use `before` (an entry id from the previous page) to paginate.',
+    description: 'List entries in a drain, newest first. Each entry includes `streams` (the stream slugs it is filed in). Use `before` (an entry id from the previous page) to paginate.',
     inputSchema: z.object({ dbName: z.string(), limit: z.number().optional(), before: z.string().optional() }),
   },
   async ({ dbName, limit, before }) => {
@@ -137,10 +139,20 @@ server.registerTool(
   'append_entry',
   {
     description:
-      'Add a new log entry to a drain, attributed to this account. Write "@user@example.com" to mention someone or "[[dbName]]"/"[[dbName#entryId]]" to reference another drain/entry — both render as real pills, see server instructions for the exact syntax.',
-    inputSchema: z.object({ dbName: z.string(), content: z.string() }),
+      'Add a new log entry to a drain, attributed to this account. Write "@user@example.com" to mention someone or "[[dbName]]"/"[[dbName#entryId]]" to reference another drain/entry — both render as real pills, see server instructions for the exact syntax. Pass `streams` (names, e.g. ["HCI"]) to file it into streams — topics inside the drain; missing streams are created. Check list_streams first and reuse existing names.',
+    inputSchema: z.object({ dbName: z.string(), content: z.string(), streams: z.array(z.string()).max(10).optional() }),
   },
-  async ({ dbName, content }) => text(await api('POST', `/api/drains/${dbName}/entries`, { content }))
+  async ({ dbName, content, streams }) => text(await api('POST', `/api/drains/${dbName}/entries`, { content, streams }))
+)
+
+server.registerTool(
+  'list_streams',
+  {
+    description:
+      "List a drain's streams (topics within it) with how many entries each has. Use before append_entry so new entries go into an existing stream instead of a near-duplicate.",
+    inputSchema: z.object({ dbName: z.string() }),
+  },
+  async ({ dbName }) => text(await api('GET', `/api/drains/${dbName}/streams`))
 )
 
 server.registerTool(
